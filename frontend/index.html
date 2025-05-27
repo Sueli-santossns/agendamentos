@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agende seu horário</title>
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./stylo.css" />
+</head>
+<body>
+  <header>
+    <h1>Agende seu horário</h1>
+  </header>
+
+  <section>
+    <form id="form-agendamento">
+      <input type="text" id="nome" name="nome" placeholder="Seu nome" required />
+      <input type="email" id="email" name="email" placeholder="Seu e-mail" required />
+      <input type="text" id="data" name="data" placeholder="Selecione uma data" required>
+
+      <select id="hora" name="hora" required>
+  <option value="">Selecione a hora</option>
+</select>
+
+      <select id="servico" name="servico">
+        <option value="design">Design de sobrancelhas</option>
+        <option value="henna">Design com Henna</option>
+        <option value="rena">Sobrancelha de Rena</option>
+        <option value="correcao">Correção de falhas</option>
+        <option value="avaliacao">Avaliação gratuita</option>
+      </select>
+      <button type="submit">Agendar</button>
+    </form>
+    <p id="mensagem"></p>
+  </section>
+  <!-- Flatpickr JS -->
+  
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

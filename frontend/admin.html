@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #f7f7f7;
+      --bg-dark: #1e1e1e;
+      --text-light: #000;
+      --text-dark: #fff;
+      --primary: #4CAF50;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0;
+    }
+
+    .toggle-theme {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: 1px solid white;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .toggle-theme:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    #login-form {
+      max-width: 320px;
+      margin: 2rem auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 2rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
+    }
+
+    .dark-mode #login-form {
+      background: rgba(34, 34, 34, 0.8);
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #45a049;
+      transform: scale(1.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      animation: fadeIn 1s ease;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background: #eee;
+    }
+
+    #painel {
+      padding: 20px;
+    }
+
+    @media (max-width: 600px) {
+      table {
+        font-size: 0.8rem;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Painel Admin</h1>
+    <button class="toggle-theme" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <div id="login">
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+
+  <div id="painel" style="display:none;">
+    <h2>Lista de Agendamentos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Data</th>
+          <th>Hora</th>
+          <th>Serviço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabela-agendamentos"></tbody>
+    </table>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    const form = document.getElementById("login-form");
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      const res = await fetch("http://localhost:5000/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, senha })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        form.style.animation = 'shake 0.3s';
+        form.addEventListener('animationend', () => form.style.animation = '');
+        alert(data.message);
+        return;
+      }
+
+      localStorage.setItem('authToken', data.token);
+
+      document.getElementById("login").style.display = "none";
+      document.getElementById("painel").style.display = "block";
+
+      const agendamentoRes = await fetch("http://localhost:5000/api/admin/agendamentos", {
+        headers: {
+          "Authorization": `Bearer ${data.token}`
+        }
+      });
+
+      const agendamentos = await agendamentoRes.json();
+
+      if (!agendamentoRes.ok) {
+        alert(agendamentos.message || "Erro ao carregar agendamentos.");
+        return;
+      }
+
+      const tbody = document.getElementById("tabela-agendamentos");
+      tbody.innerHTML = '';
+      agendamentos.forEach(ag => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${ag.nome}</td>
+          <td>${ag.email || '-'}</td>
+          <td>${ag.data}</td>
+          <td>${ag.hora}</td>
+          <td>${ag.servico}</td>
+          <td><button onclick="deletarAgendamento('${ag._id}', this)">Excluir</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+
+    async function deletarAgendamento(id, btn) {
+      const token = localStorage.getItem('authToken');
+      if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
+      const res = await fetch(`http://localhost:5000/api/admin/agendamentos/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        btn.closest("tr").remove();
+        alert("Agendamento excluído com sucesso!");
+      } else {
+        const erro = await res.json();
+        alert(erro.message || "Erro ao excluir.");
+      }
+    }
+  </script>
+</body>
+</html>
