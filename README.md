@@ -38,9 +38,6 @@ Configuração do e-mail
 
 Para usar o envio automático de e-mails, configure um e-mail no serviço Gmail e gere uma senha de app para colocar no transporter do Nodemailer.
 
-Observações
 
-- Após criar o admin via rota /api/admin/criar, apague essa rota do servidor por segurança.
-- Certifique-se que o MongoDB esteja rodando localmente na porta 27017 com o banco de dados chamado agendamentos
 
 
